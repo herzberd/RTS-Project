@@ -1,0 +1,27 @@
+
+
+.TacoBell {
+  flex: 1;
+  color: #e3e3e3;
+}
+
+.App {
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  height: 100vh !important;
+}
+
+.NavBar {
+  flex: 1;
+  background-color:#4e4e4e;
+}
+
+.MainStage {
+  flex: 6;
+}
+
+.Test {
+  height: 100px;
+  border: 1px solid red;
+}
