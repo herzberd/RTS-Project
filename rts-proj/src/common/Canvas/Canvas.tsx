@@ -10,7 +10,7 @@ class Canvas extends React.Component<{}, {}> {
     private canvas: any;
 
     public componentDidMount() {
-        this.canvas = this.refs.canvas;
+        this.canvas = refStr;
         this.ctx = this.canvas.getContext(contextStr);
     }
 
