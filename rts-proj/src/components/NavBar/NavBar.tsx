@@ -11,7 +11,7 @@ class NavBar extends React.Component<{}, {}>{
 
         this.links = [
             {
-                name: "Test",
+                name: "Task Generator",
                 onClick: () => {
                     alert("Test");
                 },

@@ -14,14 +14,33 @@
 
 .NavBar {
   flex: 1;
-  background-color:#4e4e4e;
+  background-color:#a4262c;
 }
 
 .MainStage {
   flex: 6;
+  color: black;
 }
 
 .Test {
   height: 100px;
   border: 1px solid red;
+}
+
+.DetailsListTasks {
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-top: 5%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  max-height: 50%;
+}
+
+.SimControls {
+  margin-top: 10%;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px;
+  border: 2px solid #da3b01;
 }
