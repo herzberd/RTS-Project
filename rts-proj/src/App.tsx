@@ -1,6 +1,6 @@
 /* tslint:disable */
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
-import { DefaultButton, DetailsList, Fabric, TextField, ConstrainMode } from 'office-ui-fabric-react';
+import { DefaultButton, DetailsList, Fabric, TextField, ConstrainMode, CommandBar } from 'office-ui-fabric-react';
 import * as React from 'react';
 import './App.css';
 import NavBar from './components/NavBar/NavBar';
@@ -8,6 +8,7 @@ import Task, { ITask } from './sim/Task/Task';
 
 interface IAppState {
   spinnerVal: number;
+  tasks: Task[];
 }
 
 class App extends React.Component<{}, IAppState> {
@@ -16,7 +17,10 @@ class App extends React.Component<{}, IAppState> {
   public constructor(props: any) {
     super(props);
 
-    this.state = { spinnerVal: 0 }
+    this.state = {
+      spinnerVal: 0,
+      tasks: []
+    }
 
     initializeIcons();
 
@@ -32,32 +36,75 @@ class App extends React.Component<{}, IAppState> {
             <NavBar />
           </div>
           <div className="MainStage">
+            <CommandBar
+              items={[
+                {
+                  key: "1",
+                  text: "Test"
+                }
+              ]}
+            />
             <div className="DetailsListTasks">
               <DetailsList
-                columns={[
+                columns={[ // Let's dress this boy for the prom
                   {
+                    fieldName: "id",
                     key: "1",
-                    name: "id",
+                    name: "ID",
                     minWidth: 0,
                     maxWidth: 10,
                   },
                   {
+                    fieldName: "period",
                     key: "2",
-                    name: "period",
+                    name: "Period",
+                    minWidth: 0,
+                    maxWidth: 10
+                  },
+                  {
+                    fieldName: "deadline",
+                    key: "3",
+                    name: "Deadline",
+                    minWidth: 0,
+                    maxWidth: 10
+                  },
+                  {
+                    fieldName: "size",
+                    key: "4",
+                    name: "Size",
+                    minWidth: 0,
+                    maxWidth: 5
+                  },
+                  {
+                    fieldName: "dependencies",
+                    key: "5",
+                    name: "Dependencies",
+                    minWidth: 0,
+                    maxWidth: 10
+                  },
+                  {
+                    fieldName: "children",
+                    key: "6",
+                    name: "Children",
                     minWidth: 0,
                     maxWidth: 10
                   }
                 ]}
-                items={this.tasks.map(x => {
+                items={this.state.tasks.map((x, i) => {
+                  console.log("Object " + i + ": ", x)
                   let thing: Object = {
                     key: x.id + '',
-                    id: x.id,
-                    period: x.period
+                    id: x.id + '',
+                    period: x.period + '',
+                    deadline: x.deadline,
+                    size: x.ops.length,
+                    children: 0,
+                    dependencies: x.dependencies.length
                   };
                   console.log(thing);
                   return thing;
                 })}
-                constrainMode={ConstrainMode.unconstrained}
+                constrainMode={ConstrainMode.unconstrained} // Does the opposite of what you'd think
               />
             </div>
             <div className="SimControls">
@@ -73,6 +120,7 @@ class App extends React.Component<{}, IAppState> {
                   }
                 }}
               />
+              <br />
               <DefaultButton
                 text="Generate Tasks"
                 onClick={() => { this.generateTasks() }}
@@ -93,14 +141,17 @@ class App extends React.Component<{}, IAppState> {
         dependencies: [],
         ops: [],
         parent: 0,
-        period: 0
+        period: 0,
+        phase: 0
       }
       let t: Task = new Task(params);
-      t.publicGenOps(10, 0);
+      t.publicGenOps(10, 5);
       this.tasks.push(t);
     }
-    console.log(this.tasks);
-    this.forceUpdate();
+    this.setState({
+      tasks: this.tasks
+
+    });
   }
 }
 

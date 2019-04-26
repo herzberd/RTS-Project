@@ -27,7 +27,7 @@ class NavBar extends React.Component<{}, {}>{
     public render() {
         return (
             <div className="NavBarMain">
-                <p>NavBar</p>
+                <p>RTS Project</p>
                 <Nav
                     groups={this.groups}
                 />

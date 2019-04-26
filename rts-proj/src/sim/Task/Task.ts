@@ -4,6 +4,7 @@ export interface ITask {
     id: number;
     period: number;
     deadline: number;
+    phase: number;
     dependencies: number[];
     ops: number[];
 }
@@ -15,6 +16,7 @@ class Task implements ITask {
     public id: number;
     public period: number;
     public deadline: number;
+    public phase: number;
     public dependencies: number[];
     public ops: number[];
 
@@ -26,12 +28,14 @@ class Task implements ITask {
         this.id = 0;
         this.period = 0;
         this.deadline = 0;
+        this.phase = 0;
 
         if (params) {
             this.parent = params.parent;
             this.id = params.id;
             this.period = params.period;
             this.deadline = params.deadline;
+            this.phase = params.phase;
             console.log(this.id);
         }
 
