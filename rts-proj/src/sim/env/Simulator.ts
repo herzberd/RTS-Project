@@ -84,6 +84,46 @@ class Simulator {
 
     private EDF() {
         console.log("EDF");
+        let time: number = 0;
+        let lastTask: number = -1;
+        let finalRound: boolean = false;
+        while (this.jobsNotFinished() || finalRound) {
+            let things: Task[] = [];
+
+            for (let i: number = 0; i < this.tasks.length; i++) {
+                if (!this.tasks[i].isFinished()) {
+                    things.push(this.tasks[i]);
+                }
+            }
+
+            // Find task soonest deadline
+            things.sort((a: Task, b: Task) => {
+                let aSlack: number = a.deadline;
+                let bSlack: number = b.deadline;
+
+                if (aSlack < bSlack)
+                    return -1;
+                else if (aSlack == bSlack)
+                    return 1;
+                else
+                    return 0;
+            });
+
+            if (things.length == 0) {
+                break;
+            }
+            else if (things[0].id != lastTask) {  // EDF Task changed
+                if (lastTask != -1)
+                    this.tasks[lastTask].passMsg(ISimMessage.Stop, time);
+                this.tasks[things[0].id].passMsg(ISimMessage.Start, time);
+                lastTask = things[0].id;
+            }
+            else { //Same task
+                this.tasks[things[0].id].passMsg(ISimMessage.Stay, time);
+            }
+
+            time++;
+        }
     }
 
     private LST() {

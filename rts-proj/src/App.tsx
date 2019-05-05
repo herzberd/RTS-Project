@@ -16,6 +16,7 @@ interface IAppState {
 class App extends React.Component<{}, IAppState> {
   private tasks: Task[];
   private simEnv: Simulator;
+  private simSelectOption: any;
 
   public constructor(props: any) {
     super(props);
@@ -30,6 +31,7 @@ class App extends React.Component<{}, IAppState> {
 
     this.tasks = [];
     this.simEnv = new Simulator(SchedulerAlg.LST);
+    this.simSelectOption = "FIFO";
   }
 
   public render() {
@@ -57,19 +59,25 @@ class App extends React.Component<{}, IAppState> {
               }}
             >
               <ChoiceGroup
+                defaultChecked={this.simSelectOption}
+                
                 onChange={(ev: any, option: any) => {
                   switch (option.key) {
                     case "FIFO":
                       this.simEnv = new Simulator(SchedulerAlg.FIFO);
+                      this.simSelectOption = "FIFO";
                       break;
                     case "RR":
                       this.simEnv = new Simulator(SchedulerAlg.RoundRobin);
+                      this.simSelectOption = "RR";
                       break;
                     case "EDF":
                       this.simEnv = new Simulator(SchedulerAlg.EDF);
+                      this.simSelectOption = "EDF";
                       break;
                     case "LST":
                       this.simEnv = new Simulator(SchedulerAlg.LST);
+                      this.simSelectOption = "LST";
                       break;
                   }
                 }}
@@ -98,15 +106,8 @@ class App extends React.Component<{}, IAppState> {
                 {
                   key: "1",
                   text: "Run Simulation",
-                  onClick: () => { console.log(this.simEnv); this.simEnv.runSimulation() }
-                },
-                {
-                  key: "blank1"
-                },
-                {
-                  key: "reset",
-                  text: "Reset Tasks",
                   onClick: () => {
+                    console.log(this.simEnv);
                     let tmpTasks: Task[] = this.state.tasks;
 
                     for (let i: number = 0; i < tmpTasks.length; i++) {
@@ -116,7 +117,11 @@ class App extends React.Component<{}, IAppState> {
                     this.setState({
                       tasks: tmpTasks
                     });
+                    this.simEnv.runSimulation()
                   }
+                },
+                {
+                  key: "blank1"
                 },
                 {
                   key: "2",
