@@ -2,11 +2,15 @@ import { INavLink, INavLinkGroup, Nav } from 'office-ui-fabric-react';
 import * as React from 'react';
 import './NavBar.css';
 
-class NavBar extends React.Component<{}, {}>{
+interface INavBarProps {
+    panelCallback: any;
+}
+
+class NavBar extends React.Component<INavBarProps, {}>{
     private groups: INavLinkGroup[] = [];
     private links: INavLink[] = [];
 
-    public constructor(props: any) {
+    public constructor(props: INavBarProps) {
         super(props);
 
         this.links = [
@@ -16,6 +20,13 @@ class NavBar extends React.Component<{}, {}>{
                     alert("Test");
                 },
                 url: "",
+            },
+            {
+                name: "Configure Simulation",
+                onClick: () => {
+                    this.props.panelCallback()
+                },
+                url: ""
             }
         ];
 

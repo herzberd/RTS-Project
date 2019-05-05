@@ -1,51 +1,134 @@
 /* tslint:disable */
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
-import { DefaultButton, DetailsList, Fabric, TextField, ConstrainMode, CommandBar } from 'office-ui-fabric-react';
+import { DefaultButton, DetailsList, Fabric, TextField, ConstrainMode, CommandBar, Panel, ChoiceGroup } from 'office-ui-fabric-react';
 import * as React from 'react';
 import './App.css';
 import NavBar from './components/NavBar/NavBar';
 import Task, { ITask } from './sim/Task/Task';
+import Simulator, { SchedulerAlg } from './sim/env/Simulator';
 
 interface IAppState {
   spinnerVal: number;
   tasks: Task[];
+  showPanel: boolean;
 }
 
 class App extends React.Component<{}, IAppState> {
   private tasks: Task[];
+  private simEnv: Simulator;
 
   public constructor(props: any) {
     super(props);
 
     this.state = {
       spinnerVal: 0,
-      tasks: []
+      tasks: [],
+      showPanel: false
     }
 
     initializeIcons();
 
     this.tasks = [];
+    this.simEnv = new Simulator(SchedulerAlg.LST);
   }
 
   public render() {
-    // console.log(this.tasks);
+    this.simEnv.loadTasks(this.state.tasks);
+
     return (
       <Fabric className="TacoBell">
         <div className="App">
           <div className="NavBar">
-            <NavBar />
+            <NavBar
+              panelCallback={() => this.setState({
+                showPanel: !this.state.showPanel
+              })}
+            />
           </div>
           <div className="MainStage">
+            <Panel
+              isOpen={this.state.showPanel}
+              isLightDismiss={true}
+              headerText="Simulator Config"
+              onDismiss={() => {
+                this.setState({
+                  showPanel: false
+                });
+              }}
+            >
+              <ChoiceGroup
+                onChange={(ev: any, option: any) => {
+                  switch (option.key) {
+                    case "FIFO":
+                      this.simEnv = new Simulator(SchedulerAlg.FIFO);
+                      break;
+                    case "RR":
+                      this.simEnv = new Simulator(SchedulerAlg.RoundRobin);
+                      break;
+                    case "EDF":
+                      this.simEnv = new Simulator(SchedulerAlg.EDF);
+                      break;
+                    case "LST":
+                      this.simEnv = new Simulator(SchedulerAlg.LST);
+                      break;
+                  }
+                }}
+                options={[
+                  {
+                    key: "FIFO",
+                    text: "First-In First-Out"
+                  },
+                  {
+                    key: "RR",
+                    text: "Round Robin"
+                  },
+                  {
+                    key: "EDF",
+                    text: "Earliest Deadline First"
+                  },
+                  {
+                    key: "LST",
+                    text: "Least Slack Time Remaining"
+                  }
+                ]}
+              />
+            </Panel>
             <CommandBar
               items={[
                 {
                   key: "1",
-                  text: "Test"
+                  text: "Run Simulation",
+                  onClick: () => { console.log(this.simEnv); this.simEnv.runSimulation() }
+                },
+                {
+                  key: "blank1"
+                },
+                {
+                  key: "reset",
+                  text: "Reset Tasks",
+                  onClick: () => {
+                    let tmpTasks: Task[] = this.state.tasks;
+
+                    for (let i: number = 0; i < tmpTasks.length; i++) {
+                      tmpTasks[i].reset();
+                    }
+
+                    this.setState({
+                      tasks: tmpTasks
+                    });
+                  }
+                },
+                {
+                  key: "2",
+                  text: "Inspect Task",
+                  disabled: true,
+                  onClick: () => alert("Not implemented")
                 }
               ]}
             />
             <div className="DetailsListTasks">
               <DetailsList
+                compact={true}
                 columns={[ // Let's dress this boy for the prom
                   {
                     fieldName: "id",
@@ -91,7 +174,7 @@ class App extends React.Component<{}, IAppState> {
                   }
                 ]}
                 items={this.state.tasks.map((x, i) => {
-                  console.log("Object " + i + ": ", x)
+                  // console.log("Object " + i + ": ", x)
                   let thing: Object = {
                     key: x.id + '',
                     id: x.id + '',
@@ -101,10 +184,10 @@ class App extends React.Component<{}, IAppState> {
                     children: 0,
                     dependencies: x.dependencies.length
                   };
-                  console.log(thing);
+                  // console.log(thing);
                   return thing;
                 })}
-                constrainMode={ConstrainMode.unconstrained} // Does the opposite of what you'd think
+                constrainMode={ConstrainMode.unconstrained} // Does the opposite of what you'd think 🙄
               />
             </div>
             <div className="SimControls">
@@ -142,15 +225,15 @@ class App extends React.Component<{}, IAppState> {
         ops: [],
         parent: 0,
         period: 0,
-        phase: 0
+        phase: 0,
+        messages: []
       }
       let t: Task = new Task(params);
-      t.publicGenOps(10, 5);
+      t.GenOps(10, 5);
       this.tasks.push(t);
     }
     this.setState({
       tasks: this.tasks
-
     });
   }
 }
