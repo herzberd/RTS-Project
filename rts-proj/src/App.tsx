@@ -275,7 +275,6 @@ class App extends React.Component<{}, IAppState> {
       let params: ITask = {
         id: i,
         deadline: 0,
-        dependencies: [],
         ops: 0,
         period: 0,
         messages: []

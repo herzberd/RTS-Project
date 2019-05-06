@@ -3,7 +3,6 @@ export interface ITask {
     id: number;
     period: number;
     deadline: number;
-    dependencies: number[];
     ops: number;
     messages: any[];
 }
@@ -17,7 +16,6 @@ export enum ISimMessage {
     Start = 0,
     Stop,
     Finish,
-    SwitchCore,
     Stay
 }
 
@@ -25,14 +23,13 @@ class Task implements ITask {
     public id: number;
     public period: number;
     public deadline: number;
-    public phase: number;
-    public dependencies: number[];
     public ops: number;
     public messages: any[];
     public finished: boolean;
 
     private irCount: number;
     private lastStart: number;
+    private turnaround: number;
 
     public constructor(params?: ITask) {
         this.id = 0;
@@ -40,6 +37,7 @@ class Task implements ITask {
         this.deadline = 0;
         this.irCount = 0;
         this.lastStart = 0;
+        this.turnaround = 0;
 
         if (params) {
             this.id = params.id;
@@ -48,7 +46,6 @@ class Task implements ITask {
             // console.log(this.id);
         }
 
-        this.dependencies = [];
         this.ops = 0;
         this.messages = [];
     }
@@ -79,8 +76,10 @@ class Task implements ITask {
                 break;
             case ISimMessage.Finish:
                 this.irCount += (value - this.lastStart);
+                this.turnaround =  value - this.messages[0]["value"];
                 this.finished = true;
                 console.log("Task " + this.id + " met deadline: ", this.metDeadline());
+                console.log("Task " + this.id + " turnaround: ", this.turnaround);
                 console.log("Task " + this.id + " msg log", this.messages);
                 break;
             case ISimMessage.Stay:
