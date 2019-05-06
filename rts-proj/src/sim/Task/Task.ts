@@ -1,12 +1,10 @@
 /* tslint:disable */
 export interface ITask {
-    parent: number;
     id: number;
     period: number;
     deadline: number;
-    phase: number;
     dependencies: number[];
-    ops: number[];
+    ops: number;
     messages: any[];
 }
 
@@ -23,16 +21,13 @@ export enum ISimMessage {
     Stay
 }
 
-const highestOpCode: number = 2;
-
 class Task implements ITask {
-    public parent: number;
     public id: number;
     public period: number;
     public deadline: number;
     public phase: number;
     public dependencies: number[];
-    public ops: number[];
+    public ops: number;
     public messages: any[];
     public finished: boolean;
 
@@ -40,30 +35,26 @@ class Task implements ITask {
     private lastStart: number;
 
     public constructor(params?: ITask) {
-        this.parent = 0;
         this.id = 0;
         this.period = 0;
         this.deadline = 0;
-        this.phase = 0;
         this.irCount = 0;
         this.lastStart = 0;
 
         if (params) {
-            this.parent = params.parent;
             this.id = params.id;
             this.period = params.period;
             this.deadline = params.deadline;
-            this.phase = params.phase;
             // console.log(this.id);
         }
 
         this.dependencies = [];
-        this.ops = [];
+        this.ops = 0;
         this.messages = [];
     }
 
     public isFinished(): boolean {
-        return (this.irCount + 1 >= this.ops.length);
+        return (this.irCount + 1 >= this.ops);
     }
 
     public reset(){
@@ -102,7 +93,7 @@ class Task implements ITask {
     }
 
     public getSlackTime(): number {
-        return this.ops.length - this.irCount;
+        return this.ops - this.irCount;
     }
 
     public metDeadline(): boolean {
@@ -119,12 +110,10 @@ class Task implements ITask {
             } else {
                 randTasks -= val;
             }
+            this.ops = randTasks;
             // console.log(randTasks, variance, val);
         }
-        for (let i: number = 0; i < randTasks; i++) {
-            this.ops.push(Math.floor((Math.random() * 10)) % (highestOpCode + 1));
-        }
-        this.deadline = this.ops.length + Math.floor((Math.random() * this.ops.length) * (Math.random() * 7));
+        this.deadline = this.ops + Math.floor((Math.random() * this.ops) * (Math.random() * 7));
     }
 }
 

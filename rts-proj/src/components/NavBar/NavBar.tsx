@@ -3,7 +3,7 @@ import * as React from 'react';
 import './NavBar.css';
 
 interface INavBarProps {
-    panelCallback: any;
+    simConfigPanelCallback: any;
 }
 
 class NavBar extends React.Component<INavBarProps, {}>{
@@ -24,7 +24,7 @@ class NavBar extends React.Component<INavBarProps, {}>{
             {
                 name: "Configure Simulation",
                 onClick: () => {
-                    this.props.panelCallback()
+                    this.props.simConfigPanelCallback()
                 },
                 url: ""
             }

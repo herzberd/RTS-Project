@@ -6,17 +6,13 @@ export enum SchedulerAlg {
     RoundRobin = 1,
     EDF = 2,
     LST = 3,
-    CLAIRVOYANT = 99
 }
-
-/*  CONSIDERATIONS
-    preemption
-    # cpus
-*/
 
 class Simulator {
     private tasks: Task[];
     private alg: SchedulerAlg;
+    // @ts-ignore:next
+    private cores: number;
 
     public constructor(schedulerType: SchedulerAlg) {
         console.log("Creating Simulator");
@@ -60,7 +56,7 @@ class Simulator {
         let time: number = 0;
         for (let i: number = 0; i < this.tasks.length; i++) {
             this.tasks[i].passMsg(ISimMessage.Start, time);
-            time += this.tasks[i].ops.length;
+            time += this.tasks[i].ops;
             this.tasks[i].passMsg(ISimMessage.Finish, time);
         }
     }

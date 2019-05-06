@@ -1,6 +1,6 @@
 /* tslint:disable */
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
-import { DefaultButton, DetailsList, Fabric, TextField, ConstrainMode, CommandBar, Panel, ChoiceGroup } from 'office-ui-fabric-react';
+import { DefaultButton, DetailsList, Fabric, TextField, ConstrainMode, CommandBar, Panel, ChoiceGroup, Checkbox } from 'office-ui-fabric-react';
 import * as React from 'react';
 import './App.css';
 import NavBar from './components/NavBar/NavBar';
@@ -10,13 +10,16 @@ import Simulator, { SchedulerAlg } from './sim/env/Simulator';
 interface IAppState {
   spinnerVal: number;
   tasks: Task[];
-  showPanel: boolean;
+  showSimConfig: boolean;
+  showTaskInspect: boolean;
+  affinity: boolean;
 }
 
 class App extends React.Component<{}, IAppState> {
   private tasks: Task[];
   private simEnv: Simulator;
   private simSelectOption: any;
+  private taskObj: any;
 
   public constructor(props: any) {
     super(props);
@@ -24,7 +27,9 @@ class App extends React.Component<{}, IAppState> {
     this.state = {
       spinnerVal: 0,
       tasks: [],
-      showPanel: false
+      showSimConfig: false,
+      showTaskInspect: false,
+      affinity: true
     }
 
     initializeIcons();
@@ -42,25 +47,27 @@ class App extends React.Component<{}, IAppState> {
         <div className="App">
           <div className="NavBar">
             <NavBar
-              panelCallback={() => this.setState({
-                showPanel: !this.state.showPanel
+              simConfigPanelCallback={() => this.setState({
+                showSimConfig: !this.state.showSimConfig
               })}
+
             />
           </div>
           <div className="MainStage">
             <Panel
-              isOpen={this.state.showPanel}
+              isOpen={this.state.showSimConfig}
               isLightDismiss={true}
               headerText="Simulator Config"
               onDismiss={() => {
+                this.resetTasks();
                 this.setState({
-                  showPanel: false
+                  showSimConfig: false
                 });
               }}
             >
               <ChoiceGroup
                 defaultChecked={this.simSelectOption}
-                
+
                 onChange={(ev: any, option: any) => {
                   switch (option.key) {
                     case "FIFO":
@@ -100,6 +107,43 @@ class App extends React.Component<{}, IAppState> {
                   }
                 ]}
               />
+              <br />
+              <Checkbox
+                label="Core Affinity"
+                defaultChecked={this.state.affinity}
+              />
+            </Panel>
+            <Panel
+              isOpen={this.state.showTaskInspect}
+              isLightDismiss={true}
+              headerText="Task Inspector"
+              onDismiss={() => {
+                this.setState({
+                  showTaskInspect: false
+                });
+              }}
+            >
+              <TextField
+                label="Data dump"
+                multiline={true}
+                defaultValue={JSON.stringify(this.state.tasks)}
+                onChange={(ev, x) => {
+                  console.log("Raw text: ", x);
+                  if (x) {
+                    this.taskObj = x;
+                    // console.log(JSON.parse(x));
+                  }
+                  console.log(this.taskObj);
+                }}
+              />
+              <DefaultButton
+                text="Test"
+                onClick={() => {
+                  this.setState({
+                    tasks: JSON.parse('\'' + this.taskObj + '\'')
+                  });
+                }}
+              />
             </Panel>
             <CommandBar
               items={[
@@ -108,26 +152,18 @@ class App extends React.Component<{}, IAppState> {
                   text: "Run Simulation",
                   onClick: () => {
                     console.log(this.simEnv);
-                    let tmpTasks: Task[] = this.state.tasks;
-
-                    for (let i: number = 0; i < tmpTasks.length; i++) {
-                      tmpTasks[i].reset();
-                    }
-
-                    this.setState({
-                      tasks: tmpTasks
-                    });
-                    this.simEnv.runSimulation()
+                    this.resetTasks();
+                    this.simEnv.runSimulation();
                   }
                 },
                 {
-                  key: "blank1"
-                },
-                {
                   key: "2",
-                  text: "Inspect Task",
-                  disabled: true,
-                  onClick: () => alert("Not implemented")
+                  text: "Inspect Tasks",
+                  onClick: () => {
+                    this.setState({
+                      showTaskInspect: true
+                    });
+                  }
                 }
               ]}
             />
@@ -164,18 +200,18 @@ class App extends React.Component<{}, IAppState> {
                     maxWidth: 5
                   },
                   {
-                    fieldName: "dependencies",
+                    fieldName: "metDeadline",
                     key: "5",
-                    name: "Dependencies",
+                    name: "Met Deadline",
                     minWidth: 0,
-                    maxWidth: 10
+                    maxWidth: 5
                   },
                   {
-                    fieldName: "children",
+                    fieldName: "alg",
                     key: "6",
-                    name: "Children",
+                    name: "Algorithm",
                     minWidth: 0,
-                    maxWidth: 10
+                    maxWidth: 5
                   }
                 ]}
                 items={this.state.tasks.map((x, i) => {
@@ -185,9 +221,9 @@ class App extends React.Component<{}, IAppState> {
                     id: x.id + '',
                     period: x.period + '',
                     deadline: x.deadline,
-                    size: x.ops.length,
-                    children: 0,
-                    dependencies: x.dependencies.length
+                    size: x.ops,
+                    metDeadline: (x.isFinished() ? (x.metDeadline() ? "true" : "false") : "Begin Simulation"),
+                    alg: this.simSelectOption
                   };
                   // console.log(thing);
                   return thing;
@@ -220,6 +256,19 @@ class App extends React.Component<{}, IAppState> {
     );
   }
 
+  private resetTasks() {
+    console.log("Reseting tasks");
+    let tmpTasks: Task[] = this.state.tasks;
+
+    for (let i: number = 0; i < tmpTasks.length; i++) {
+      tmpTasks[i].reset();
+    }
+
+    this.setState({
+      tasks: tmpTasks
+    });
+  }
+
   private generateTasks() {
     this.tasks = [];
     for (let i: number = 0; i < this.state.spinnerVal; i++) {
@@ -227,10 +276,8 @@ class App extends React.Component<{}, IAppState> {
         id: i,
         deadline: 0,
         dependencies: [],
-        ops: [],
-        parent: 0,
+        ops: 0,
         period: 0,
-        phase: 0,
         messages: []
       }
       let t: Task = new Task(params);
